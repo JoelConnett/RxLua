@@ -964,7 +964,7 @@ function Observable:flatten()
   return Observable.create(function(observer)
     local subscriptions = {}
     local remaining = 1
-
+    
     local function onError(message)
       return observer:onError(message)
     end
@@ -986,11 +986,13 @@ function Observable:flatten()
       subscriptions[#subscriptions + 1] = subscription
     end
 
-    subscriptions[#subscriptions + 1] = self:subscribe(onNext, onError, onCompleted)
+    -- Fixes strange issue where the #subscriptions is wrong 
+    table.insert(subscriptions, self:subscribe(onNext, onError, onCompleted))
+    
     return Subscription.create(function ()
-      for i = 1, #subscriptions do
-        subscriptions[i]:unsubscribe()
-      end
+        for i = 1, #subscriptions do
+            subscriptions[i]:unsubscribe()
+        end
     end)
   end)
 end
