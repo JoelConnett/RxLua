@@ -987,7 +987,10 @@ function Observable:flatten()
     end
 
     -- Fixes strange issue where the #subscriptions is wrong 
-    table.insert(subscriptions, self:subscribe(onNext, onError, onCompleted))
+    local sub = self:subscribe(onNext, onError, onCompleted)
+    if sub then
+        table.insert(subscriptions, sub)
+    end
     
     return Subscription.create(function ()
         for i = 1, #subscriptions do
